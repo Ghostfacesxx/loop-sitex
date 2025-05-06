@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loop</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="img/loop.png" type="image/x-icon">
+</head>
+<body>
+  <header class="header">
+    <div class="nav">
+    <div class="logo"><img onclick="window.location.href='index.html'" class="loop-logo" src="img/loop.png" alt=""></div>
+
+    <ul>
+      <li><a href="#" data-filter="serie">Séries</a></li>
+      <li><a href="#" data-filter="filme">Filmes</a></li>
+      <li><a href="#" data-filter="favoritos">Minha Lista</a></li>
+    </ul>
+    
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Pesquisar filmes ou séries..." />
+      <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Lupa">
+    </div>
+
+    <div class="actions">
+      <a href="login.html" class="login-btn">Entrar</a>
+    </div>
+  </header>
+
+  <div class="carousel-container">
+    <div class="carousel" id="carousel">
+    </div>
+  </div>
+  
+
+  <section id="conteudo" class="conteudo-grid"></section>
+
+
+
+
+  <script>
+    let conteudo = [];
+  
+    // Pegar a lista do backend
+    fetch('/conteudo')
+      .then(res => res.json())
+      .then(lista => {
+        conteudo = lista;
+        renderizarConteudo(conteudo);
+      });
+  
+    // Verifica se o usuário está logado
+    fetch('/session-info')
+      .then(res => res.json())
+      .then(data => {
+        if (data.loggedIn) {
+          const btn = document.querySelector('.login-btn');
+          btn.textContent = 'Perfil';
+          btn.href = 'perfil.html';
+        }
+      });
+  
+    function renderizarConteudo(lista) {
+      const container = document.getElementById('conteudo');
+      container.innerHTML = '';
+      const favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
+  
+      lista.forEach(item => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+  
+        const isFavorito = favoritos.includes(item.id);
+        const coracao = isFavorito ? '❤️' : '🤍';
+  
+        card.innerHTML = `
+          <img src="${item.capa}" alt="${item.nome}" class="card-img">
+          <h3 class="card-title">${item.nome}</h3>
+          <p class="card-info">${item.duracao} - ${item.tipo}</p>
+          <div class="heart" data-id="${item.id}">${coracao}</div>
+        `;
+  
+        container.appendChild(card);
+      });
+  
+      // Ativa clique no coração
+      document.querySelectorAll('.heart').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
+  
+          if (favoritos.includes(id)) {
+            favoritos = favoritos.filter(fav => fav !== id);
+            btn.textContent = '🤍';
+          } else {
+            favoritos.push(id);
+            btn.textContent = '❤️';
+          }
+  
+          localStorage.setItem('favoritos', JSON.stringify(favoritos));
+        });
+      });
+    }
+  
+    // Filtro por categoria
+    document.querySelectorAll('[data-filter]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const filtro = link.getAttribute('data-filter');
+  
+        if (filtro === 'favoritos') {
+          const favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
+          const lista = conteudo.filter(item => favoritos.includes(item.id));
+          renderizarConteudo(lista);
+        } else {
+          const lista = conteudo.filter(item => item.tipo === filtro);
+          renderizarConteudo(lista);
+        }
+      });
+    });
+  </script>
+  
+  
+  
+</body>
+</html>
