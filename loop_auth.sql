@@ -1,3 +1,4 @@
+
 -- Criação do banco de dados
 CREATE DATABASE IF NOT EXISTS loop_auth;
 USE loop_auth;
