@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Adicionar Conteúdo</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="shortcut icon" href="img/loop.png" type="image/x-icon">
+</head>
+<body>
+
+<header class="header">
+  <div class="nav">
+    <div class="logo">
+      <img class="loop-logo" src="img/loop.png" alt="">
+    </div>
+    <ul>
+      <li><a href="index.html">Voltar ao site</a></li>
+    </ul>
+  </div>
+</header>
+
+<div class="container">
+<div class="admin-container">
+  <h1>Adicionar Filme ou Série</h1>
+  <form id="content-form">
+    <div class="form-group">
+      <label for="cover">URL da Capa</label>
+      <input type="url" id="cover" name="cover" required placeholder="https://...">
+    </div>
+
+    <div class="form-group">
+      <label for="title">Nome</label>
+      <input type="text" id="title" name="title" required placeholder="Nome do Filme/Série">
+    </div>
+
+    <div class="form-group">
+      <label for="release">Data de Lançamento</label>
+      <input type="text" id="release" name="release" required placeholder="2024">
+    </div>
+
+    <div class="form-group">
+      <label for="duration">Duração</label>
+      <input type="text" id="duration" name="duration" required placeholder="120hrs">
+    </div>
+
+    <div class="form-group">
+      <label for="type">Tipo</label>
+      <select id="type" name="type">
+        <option value="filme">Filme</option>
+        <option value="serie">Série</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn-add">Adicionar</button>
+  </form>
+</div>
+</div>
+
+<script>
+    document.getElementById('content-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+  
+      const cover = document.getElementById('cover').value;
+      const title = document.getElementById('title').value;
+      const release = document.getElementById('release').value;
+      const duration = document.getElementById('duration').value;
+      const type = document.getElementById('type').value;
+  
+      const res = await fetch('/add-conteudo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ cover, title, release, duration, type })
+      });
+  
+      const data = await res.json();
+      if (data.success) {
+        alert("Conteúdo adicionado com sucesso!");
+        document.getElementById('content-form').reset();
+      } else {
+        alert("Erro ao adicionar conteúdo: " + data.message);
+      }
+    });
+  </script>
+  
+</body>
+</html>
